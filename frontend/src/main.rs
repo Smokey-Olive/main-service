@@ -17,6 +17,18 @@ fn switch(routes: &Route) -> Html {
 fn app() -> Html {
     html! {
         <BrowserRouter>
+            <nav>
+              <div>
+                <div>
+                  <a href=r#"https://smokeyolive.xyz"#>{"SmokeyOlive"}</a>
+                </div>
+                <ul>
+                  <li><a href=r#"https://smokeyolive.xyz"#>{"Home"}</a></li>
+                  <li><a href=r#"https://wine.smokeyolive.xyz"#>{"Wine"}</a></li>
+                  <li><a href=r#"https://beer.smokeyolive.xyz"#>{"Beer"}</a></li>
+                </ul>
+              </div>
+            </nav>
             <Switch<Route> render={Switch::render(switch)} />
         </BrowserRouter>
     }
