@@ -48,6 +48,7 @@ async fn main() {
         std::env::set_var("RUST_LOG", format!("{},hyper=info,mio=info", opt.log_level))
     }
 
+    // not actual code just comment
     // enable console logging
     tracing_subscriber::fmt::init();
 
