@@ -8,37 +8,17 @@ on:
     branches: ['main']
 jobs:
   tests:
-    name: (${{ matrix.make.name }} ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        rust: [stable]
-        make:
-          - name: Clippy
-            task: cargo clippy
-          - name: Unit tests
-            task: cargo test --all
-        include:
-          - os: ubuntu-latest
-            sccache-path: /home/runner/.cache/sccache
-        exclude:
-          - os: macos-latest
-            rust: stable
-            make:
-              name: Clippy
+    runs-on: ubuntu-latest
     env:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
-      RUSTV: ${{ matrix.rust }}
+      RUSTV: stable
       SCCACHE_CACHE_SIZE: 2G
-      SCCACHE_DIR: ${{ matrix.sccache-path }}
-      # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment it back out
+      SCCACHE_DIR: /home/runner/.cache/sccache     
+       # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment it back out
     steps:
       - uses: actions/checkout@v2
       - name: Install sccache (ubuntu-latest)
-        if: matrix.os == 'ubuntu-latest'
         env:
           LINK: https://github.com/mozilla/sccache/releases/download
           SCCACHE_VERSION: 0.2.13
@@ -48,10 +28,10 @@ jobs:
           curl -L "$LINK/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH          
-      - name: Install Rust ${{ matrix.rust }}
+      - name: Install Rust stable
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
           profile: minimal
           override: true
       - name: Cache cargo registry
@@ -61,21 +41,23 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git            
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ubuntu-latest-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-                        ${{ runner.os }}-cargo-
+                        ubuntu-latest-cargo-
       - name: Save sccache
         uses: actions/cache@v2
         continue-on-error: false
         with:
-          path: ${{ matrix.sccache-path }}
-          key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          path: /home/runner/.cache/sccache         
+          key: ubuntu-latest-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-                        ${{ runner.os }}-sccache-
+                        ubuntu-latest-sccache-
       - name: Start sccache server
         run: sccache --start-server
-      - name: ${{ matrix.make.name }}
-        run: make ${{ matrix.make.task }}
+      - name: Clippy
+        run: cargo clippy
+      - name: Run Tests
+        run: cargo test --all
       - name: Print sccache stats
         run: sccache --show-stats
       - name: Stop sccache server
