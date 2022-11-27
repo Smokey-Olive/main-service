@@ -54,8 +54,8 @@ jobs:
                         ubuntu-latest-sccache-
       - name: Start sccache server
         run: sccache --start-server
-      - name: Clippy
-        run: cargo clippy
+      - name: Build
+        run: cargo build
       - name: Run Tests
         run: cargo test --all
       - name: Print sccache stats
