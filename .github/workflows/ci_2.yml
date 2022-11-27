@@ -10,25 +10,21 @@ on:
 
 jobs:
   tests:
-    name: Lets do this with Cache (${{ matrix.os }})
+    name: (${{ matrix.make.name }} ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         rust: [stable]
         make:
           - name: Clippy
-            task: "check-clippy"
+            task: cargo clippy
           - name: Unit tests
-            task: "build-all-test run-all-unit-test"
-          - name: Doc tests
-            task: "run-all-doc-test"
+            task: cargo test --all
         include:
           - os: ubuntu-latest
             sccache-path: /home/runner/.cache/sccache
-          - os: macos-latest
-            sccache-path: /Users/runner/Library/Caches/Mozilla.sccache
         exclude:
           - os: macos-latest
             rust: stable
@@ -54,11 +50,6 @@ jobs:
           curl -L "$LINK/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH          
-      - name: Install sccache (macos-latest)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update
-          brew install sccache          
       - name: Install Rust ${{ matrix.rust }}
         uses: actions-rs/toolchain@v1
         with:
