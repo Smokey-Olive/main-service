@@ -7,8 +7,9 @@ on:
   push:
     branches: ['main']
 jobs:
-  tests:
+  main:
     runs-on: ubuntu-latest
+
     env:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
@@ -16,8 +17,10 @@ jobs:
       SCCACHE_CACHE_SIZE: 2G
       SCCACHE_DIR: /home/runner/.cache/sccache     
        # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment it back out
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Install sccache (ubuntu-latest)
         env:
           LINK: https://github.com/mozilla/sccache/releases/download
@@ -28,12 +31,14 @@ jobs:
           curl -L "$LINK/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH          
+
       - name: Install Rust stable
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           components: rustfmt, clippy
           override: true
+
       - name: Cache cargo registry
         uses: actions/cache@v2
         continue-on-error: false
@@ -44,6 +49,7 @@ jobs:
           key: ubuntu-latest-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
                         ubuntu-latest-cargo-
+
       - name: Save sccache
         uses: actions/cache@v2
         continue-on-error: false
@@ -52,13 +58,21 @@ jobs:
           key: ubuntu-latest-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
                         ubuntu-latest-sccache-
+
       - name: Start sccache server
         run: sccache --start-server
-      - name: Build
-        run: cargo build
+
+      - name: Format
+        run: cargo fmt -- --check
+
+      - name: Build Server
+        run: cd server && cargo build
+
       - name: Run Tests
         run: cargo test --all
+
       - name: Print sccache stats
         run: sccache --show-stats
+
       - name: Stop sccache server
         run: sccache --stop-server || true
