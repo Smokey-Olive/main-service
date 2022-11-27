@@ -1,5 +1,5 @@
-# .github/workflows/ci.yml
-name: Pull REquest v2
+# .github/workflows/pull_request.yml
+name: Pull Request Action
 
 on:
   pull_request:
