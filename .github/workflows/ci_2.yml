@@ -3,11 +3,9 @@ name: Pull REquest v2
 
 on:
   pull_request:
-    types: 
-      - opened
-    branches:
-      - "main"
-
+    types: ['opened', 'reopened', 'synchronize']
+  push:
+    branches: ['main']
 jobs:
   tests:
     name: (${{ matrix.make.name }} ${{ matrix.os }})
