@@ -7,7 +7,7 @@ on:
   push:
     branches: ['main']
 jobs:
-  main:
+  test:
     runs-on: ubuntu-latest
 
     env:
@@ -76,3 +76,11 @@ jobs:
 
       - name: Stop sccache server
         run: sccache --stop-server || true
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+     - name: List Directories
+       run: tree
+
