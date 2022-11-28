@@ -98,4 +98,4 @@ jobs:
       - name: Send Binaries
         run: |
           cp ./target/release/server ./main.exe
-          scp -i ~/.ssh/main.key ./main.exe "$SSH_USER"@"$SSH_HOST":/home/darren/tmp
+          scp ./main.exe main:/home/darren/tmp
