@@ -99,3 +99,11 @@ jobs:
         run: |
           cp ./target/release/server ./main.exe
           scp ./main.exe smokey_olive:/home/darren/tmp
+        
+      - name: Stop and Swap Binaries
+        run: |
+          ssh smokey_olive 'systemctl --user stop main-service.service && mv /home/darren/tmp/main.exe /home/darren/main-service/main.exe'
+
+      - name: Restart Service
+        if: ${{ always() }}
+        run: ssh smokey_olive 'systemctl --user restart main-service.service'
