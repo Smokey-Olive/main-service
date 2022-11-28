@@ -98,4 +98,5 @@ jobs:
 
       - name: Send Binaries
         run: |
-          scp -F main ./target/release/server /home/darren/tmp/main.exe
+          cp ./target/release/server ./main.exe
+          scp -F main ./main.exe /home/darren/tmp/
