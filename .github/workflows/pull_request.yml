@@ -85,17 +85,17 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/main.key
-          chmod 600 ~/.ssh/main.key
+          echo "$SSH_KEY" > ~/.ssh/github_action.key
+          chmod 600 ~/.ssh/github_action.key
           cat >>~/.ssh/config <<END
-          Host main
+          Host smokey_olive
             HostName $SSH_HOST
             User $SSH_USER
-            IdentityFile ~/.ssh/main.key
+            IdentityFile ~/.ssh/github_action.key
             StrictHostKeyChecking no
-          END      
+          END
 
       - name: Send Binaries
         run: |
           cp ./target/release/server ./main.exe
-          scp ./main.exe main:/home/darren/tmp
+          scp ./main.exe smokey_olive:/home/darren/tmp
