@@ -93,8 +93,7 @@ jobs:
             User $SSH_USER
             IdentityFile ~/.ssh/main.key
             StrictHostKeyChecking no
-          END      - name: Send Binary
-
+          END      
 
       - name: Send Binaries
         run: |
