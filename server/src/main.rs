@@ -75,7 +75,7 @@ async fn main() {
 }
 
 async fn hello() -> impl IntoResponse {
-    "hello from server! updated automatically v2"
+    "Are you looking at this ashley"
 }
 
 async fn handle_error(_err: io::Error) -> impl IntoResponse {
