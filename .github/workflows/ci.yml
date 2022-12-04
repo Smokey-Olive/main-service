@@ -7,7 +7,7 @@ on:
 
 jobs:
   frontend-ci:
-    uses: Smokey-Olive/main-service/.github/reusable-workflows/frontend-ci.yml@main
+    uses: Smokey-Olive/main-service/.github/workflows/reusable-workflows/frontend-ci.yml@main
     with:
       service-name: "main-service"
     secrets:
@@ -16,7 +16,7 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
 
   server-ci:
-    uses: Smokey-Olive/main-service/.github/reusable-workflows/server-ci.yml@main
+    uses: Smokey-Olive/main-service/.github/workflows/reusable-workflows/server-ci.yml@main
     with:
       service-name: "main-service"
     secrets:
