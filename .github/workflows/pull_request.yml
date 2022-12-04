@@ -4,16 +4,14 @@ name: Pull Request Action
 on:
   pull_request:
     types: ["opened", "reopened", "synchronize"]
-  push:
-    branches: ["main"]
 
 jobs:
   frontend-pr-check:
-    uses: Smokey-Olive/main-service/.github/reusable-workflows/frontend-pr-check.yml
+    uses: Smokey-Olive/main-service/.github/workflows/frontend-pr-check.yml@main
     with:
       service-name: "main-service"
 
   server-pr-check:
-    uses: Smokey-Olive/main-service/.github/reusable-workflows/server-pr-check.yml
+    uses: Smokey-Olive/main-service/.github/workflows/server-pr-check.yml@main
     with:
       service-name: "main-service"
