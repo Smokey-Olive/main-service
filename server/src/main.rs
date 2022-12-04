@@ -32,11 +32,11 @@ struct Opt {
     addr: String,
 
     /// set the listen port
-    #[clap(short = 'p', long = "port", default_value = "8000")]
+    #[clap(short = 'p', long = "port", default_value = "3002")]
     port: u16,
 
     /// set the directory where static files are to be found
-    #[clap(long = "static-dir", default_value = "../dist")]
+    #[clap(long = "static-dir", default_value = "../assets")]
     static_dir: String,
 }
 
@@ -48,6 +48,7 @@ async fn main() {
         std::env::set_var("RUST_LOG", format!("{},hyper=info,mio=info", opt.log_level))
     }
 
+    // not actual code just comment
     // enable console logging
     tracing_subscriber::fmt::init();
 
@@ -74,7 +75,7 @@ async fn main() {
 }
 
 async fn hello() -> impl IntoResponse {
-    "hello from server!"
+    "Final test"
 }
 
 async fn handle_error(_err: io::Error) -> impl IntoResponse {

@@ -1,58 +1,25 @@
-name: CI on merge
+# .github/workflows/ci.yml
+name: CI Action
 
 on:
   push:
-    branches:
-      - "main"
+    branches: ["main"]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  frontend-ci:
+    uses: Smokey-Olive/main-service/.github/reusable-workflows/frontend-ci.yml
+    with:
+      service-name: "main-service"
+    secrets:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install latest rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          components: rustfmt, clippy, trunk
-
-      - name: Toolchain info
-        run: |
-          cargo --version --verbose
-          rustc --version
-          cargo clippy --version
-
-      - name: Lint/Format
-        run: |
-          cargo fmt -- --check
-          cargo clippy -- -D warnings
-
-      - name: Test
-        run: |
-          cargo test --all
-
-      - name: Build Server
-        run: cd ./server && cargo build --all --release
-  
-
-      - name: Build Frontend
-        run: cd ./frontend && cargo build --all --release
-
-      - name: List Files
-        run: tree
-      # - name: Copy repository contents via scp
-      #   uses: appleboy/scp-action@master
-      #   env:
-      #     HOST: ${{ secrets.HOST }}
-      #     USERNAME: ${{ secrets.USERNAME }}
-      #     PORT: ${{ secrets.PORT }}
-      #     KEY: ${{ secrets.SSHKEY }}
-      #   with:
-      #     source: "."
-      #     target: "/home/darren/tmp"    
-        # - name: Deploy
-      #   run: |
+  server-ci:
+    uses: Smokey-Olive/main-service/.github/reusable-workflows/server-ci.yml
+    with:
+      service-name: "main-service"
+    secrets:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}

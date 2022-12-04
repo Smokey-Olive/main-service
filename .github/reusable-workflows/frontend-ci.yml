@@ -1,0 +1,60 @@
+name: Re-Usable Frontend CI Work Flow
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+    secrets:
+      SSH_USER:
+        required: true
+      SSH_PRIVATE_KEY:
+        required: true
+      SSH_HOST:
+        required: true
+
+jobs:
+  frontend-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+          profile: minimal
+          cache: true
+
+      - name: Install trunk
+        uses: jetli/trunk-action@v0.1.0
+        with:
+          version: "latest"
+
+      - name: Build
+        run: cd frontend && trunk build --release
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_action.key
+          chmod 600 ~/.ssh/github_action.key
+          cat >>~/.ssh/config <<END
+          Host smokey_olive
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/github_action.key
+            StrictHostKeyChecking no
+          END
+
+      - name: Send Files
+        run: |
+          scp -r ./assets/* smokey_olive:/home/darren/tmp/${{inputs.service-name}}-assets
+
+      - name: Swap static Files
+        run: |
+          ssh smokey_olive 'rm -fr /home/darren/${{inputs.service-name}}/assets/*
+          mv /home/darren/tmp/${{inputs.service-name}}-assets/* /home/darren/${{inputs.service-name}}/assets/'
