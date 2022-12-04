@@ -47,7 +47,7 @@ jobs:
 
       - name: Send Files
         run: |
-          scp -r ./assets smokey_olive:/home/darren/tmp/main-assets
+          scp -r ./assets/* smokey_olive:/home/darren/tmp/main-assets
 
       - name: Swap static Files
         run: |
