@@ -3,24 +3,64 @@ name: Pull Request Action
 
 on:
   pull_request:
-    types: ['opened', 'reopened', 'synchronize']
+    types: ["opened", "reopened", "synchronize"]
   push:
-    branches: ['main']
+    branches: ["main"]
+
+env:
+  RUST_BACKTRACE: full
+  RUSTC_WRAPPER: sccache
+  RUSTV: stable
+  SCCACHE_CACHE_SIZE: 2G
+  SCCACHE_DIR: /home/runner/.cache/sccache
+
+  SSH_USER: ${{ secrets.SSH_USER }}
+  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+
 jobs:
-  build-deploy:
+  frontend-build-deploy:
     runs-on: ubuntu-latest
 
-    env:
-      RUST_BACKTRACE: full
-      RUSTC_WRAPPER: sccache
-      RUSTV: stable
-      SCCACHE_CACHE_SIZE: 2G
-      SCCACHE_DIR: /home/runner/.cache/sccache     
+    steps:
+      - uses: actions/checkout@v2
+      - name: install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+          profile: minimal
+          cache: true
+      - name: Install trunk
+        uses: jetli/trunk-action@v0.1.0
+        with:
+          version: "latest"
+      - name: Build
+        run: cd frontend && trunk build --release
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/github_action.key
+          chmod 600 ~/.ssh/github_action.key
+          cat >>~/.ssh/config <<END
+          Host smokey_olive
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/github_action.key
+            StrictHostKeyChecking no
+          END
 
-      SSH_USER: ${{ secrets.SSH_USER }}
-      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-     # SCCACHE_RECACHE: 1 # Uncomment this to clear cache, then comment it back out
+      - name: Send Files
+        run: |
+          scp ./assets smokey_olive:/home/darren/tmp/main-assets
+
+      - name: Swap static Files
+        run: |
+          ssh smokey_olive 'rm -fr /home/darren/main-service/assets/* && cp -r /home/darren/tmp/main-assets/* /home/darren/main-service/assets/'
+
+  server-build-deploy:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +74,7 @@ jobs:
           mkdir -p $HOME/.local/bin
           curl -L "$LINK/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
-          echo "$HOME/.local/bin" >> $GITHUB_PATH          
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Rust stable
         uses: actions-rs/toolchain@v1
@@ -49,19 +89,19 @@ jobs:
         with:
           path: |
             ~/.cargo/registry
-            ~/.cargo/git            
+            ~/.cargo/git
           key: ubuntu-latest-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-                        ubuntu-latest-cargo-
+            ubuntu-latest-cargo-
 
       - name: Save sccache
         uses: actions/cache@v2
         continue-on-error: false
         with:
-          path: /home/runner/.cache/sccache         
+          path: /home/runner/.cache/sccache
           key: ubuntu-latest-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-                        ubuntu-latest-sccache-
+            ubuntu-latest-sccache-
 
       - name: Start sccache server
         run: sccache --start-server
@@ -80,7 +120,6 @@ jobs:
 
       - name: Stop sccache server
         run: sccache --stop-server || true
-  
 
       - name: Configure SSH
         run: |
@@ -99,7 +138,7 @@ jobs:
         run: |
           cp ./target/release/server ./main.exe
           scp ./main.exe smokey_olive:/home/darren/tmp
-        
+
       - name: Stop and Swap Binaries
         run: |
           ssh smokey_olive 'systemctl --user stop main-service.service && mv /home/darren/tmp/main.exe /home/darren/main-service/main.exe'
