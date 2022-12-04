@@ -40,12 +40,12 @@ jobs:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_action.key
+          echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/.ssh/github_action.key
           chmod 600 ~/.ssh/github_action.key
           cat >>~/.ssh/config <<END
           Host smokey_olive
-            HostName $SSH_HOST
-            User $SSH_USER
+            HostName ${{secrets.SSH_HOST}}
+            User ${{secrets.SSH_USER}}
             IdentityFile ~/.ssh/github_action.key
             StrictHostKeyChecking no
           END
