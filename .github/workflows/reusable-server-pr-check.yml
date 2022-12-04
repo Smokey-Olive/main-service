@@ -48,7 +48,7 @@ jobs:
             ~/.cargo/git
           key: ubuntu-latest-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ubuntu-latest-cargo-${{input.service-name}}-
+            ubuntu-latest-cargo-${{inputs.service-name}}-
 
       - name: Save sccache
         uses: actions/cache@v2
@@ -57,7 +57,7 @@ jobs:
           path: /home/runner/.cache/sccache
           key: ubuntu-latest-sccache-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ubuntu-latest-sccache-${{input.service-name}}-
+            ubuntu-latest-sccache-${{inputs.service-name}}-
 
       - name: Start sccache server
         run: sccache --start-server
