@@ -51,7 +51,7 @@ jobs:
 
       - name: Swap static Files
         run: |
-          ssh smokey_olive 'rm -fr /home/darren/main-service/assets/* && mv -r /home/darren/tmp/main-assets/ /home/darren/main-service/assets/'
+          ssh smokey_olive 'rm -fr /home/darren/main-service/assets/* && mv /home/darren/tmp/main-assets/* /home/darren/main-service/assets/'
 
   server-build-deploy:
     runs-on: ubuntu-latest
